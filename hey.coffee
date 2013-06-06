@@ -12,6 +12,7 @@ handlebars = require 'handlebars'
 mkdirp = require 'mkdirp'
 http = require 'http'
 url = require 'url'
+{spawn} = require 'child_process'
 
 require 'date-utils'
 
@@ -44,11 +45,7 @@ Hey = module.exports = class
 		server = http.createServer (req, res) =>
 			uri = url.parse(req.url).pathname
 			filename = path.join "#{@cwd}site", uri
-
 			return false if uri is '/favicon.ico'
-
-			console.log uri
-
 			fs.exists filename, (exists) ->
 				if not exists
 					res.writeHead 404, 'Content-Type': 'text/plain'
@@ -70,7 +67,19 @@ Hey = module.exports = class
 					res.end()
 
 		server.listen 3000
-		console.log "Server running at http://localhost:3000/"
+		console.log "Server running at http://localhost:3000"
+		console.log "CTRL+C to stop it"
+
+	publish: ->
+		do @loadConfig
+		@rsync @siteDir, @config.server
+
+	rsync: (from, to, callback) ->
+		port = "ssh -p #{@config.port or 22}"
+		child = spawn "rsync", ['-vurz', '--delete', '-e', port, from, to]
+		child.stdout.on 'data', (out) -> console.log out.toString()
+		child.stderr.on 'data', (err) -> console.error err.toString()
+		child.on 'exit', callback if callback
 
 	loadConfig: ->
 		@config = readJSON @configFile
@@ -181,13 +190,12 @@ Hey = module.exports = class
 		config = [
 			'{'
 			'  "siteTitle": "Hey, Coffee! Jack!",'
-			'  "domain": "tjeastmond.com",'
+			'  "author": "Si Rob",'
+			'  "description": "My awesome blog, JACK!",'
+			'  "site": "yoursite.com",'
 			'  "postsOnHomePage": 20,'
-			'  "server": {'
-			'    "username": "",'
-			'    "password": "",'
-			'    "host": ""'
-			'  }'
+			'  "server": "user@yoursite.com:/path/to/your/blog",'
+			'  "port": 22'
 			'}'
 		].join '\n'
 

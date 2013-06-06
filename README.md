@@ -8,6 +8,7 @@ Making a few more changes. Don't use yet.
 
 ## To Do
 
-- Implement RSYNC
+- RSS
+- Pages
 - Generate Makefile
 - Write tests
