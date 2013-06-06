@@ -1,0 +1,41 @@
+{
+  "name": "hey-coffee",
+  "version": "0.0.1",
+  "description": "Simple flatfile blog",
+  "main": "index.coffee",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": "",
+  "keywords": [
+    "blog",
+    "flatfile",
+    "coffee",
+    "cms",
+    "site"
+  ],
+  "dependencies": {
+  	"coffee-script": "*",
+  	"async": "*",
+  	"underscore": "*",
+  	"marked": "*",
+  	"commander": "*",
+  	"date-utils": "*",
+  	"request": "*",
+  	"handlebars": "*",
+    "mkdirp": "0.3.5"
+  },
+  "devDependencies": {
+  	"mocha": "*",
+  	"should": "*"
+  },
+  "bin": {
+    "hey": "./bin/hey"
+  },
+  "author": {
+    "name": "TJ Eastmond",
+    "email": "tj.eastmond@gmail.com",
+    "url": "http://tjeastmond.com"
+  },
+  "license": "MIT"
+}
