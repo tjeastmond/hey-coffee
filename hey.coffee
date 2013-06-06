@@ -4,15 +4,15 @@
 
 fs = require 'fs'
 path = require 'path'
-async = require 'async'
 crypto = require 'crypto'
+http = require 'http'
+url = require 'url'
+async = require 'async'
 _ = require 'underscore'
 marked = require 'marked'
 handlebars = require 'handlebars'
 mkdirp = require 'mkdirp'
-http = require 'http'
-url = require 'url'
-{spawn} = require 'child_process'
+rss = require 'rss'
 
 require 'date-utils'
 
@@ -23,21 +23,22 @@ Hey = module.exports = class
 		@cacheFile = "#{@cwd}hey-cache.json"
 		@configFile = "#{@cwd}hey-config.json"
 		@templateFile = "#{@cwd}template.html"
+		@pagesDir = "#{@cwd}pages/"
 		@siteDir = "#{@cwd}site/"
+		@rssFile = "#{@cwd}site/rss.xml"
 
 	init: ->
 		if fs.existsSync(@configFile) and fs.existsSync(@postPath())
 			console.log 'A blog is already setup here'
 			return false
-
 		mkdirp @siteDir
+		mkdirp @pagesDir
 		mkdirp @postPath()
 		defaults = @defaults()
 		fs.writeFileSync @cacheFile, '', 'utf8'
 		fs.writeFileSync @templateFile, defaults.tpl, 'utf8'
 		fs.writeFileSync @configFile, defaults.config, 'utf8'
 		fs.writeFileSync @postPath('first-post.md'), defaults.post, 'utf8'
-
 		yes
 
 	server: ->
@@ -75,6 +76,7 @@ Hey = module.exports = class
 		@rsync @siteDir, @config.server
 
 	rsync: (from, to, callback) ->
+		{spawn} = require 'child_process'
 		port = "ssh -p #{@config.port or 22}"
 		child = spawn "rsync", ['-vurz', '--delete', '-e', port, from, to]
 		child.stdout.on 'data', (out) -> console.log out.toString()
@@ -100,12 +102,15 @@ Hey = module.exports = class
 	postFiles: ->
 		readDir @postPath()
 
-	postInfo: (filename, includeBody) ->
-		content = fs.readFileSync(@postPath(filename)).toString()
+	pageFiles: ->
+		readDir @pagesDir
+
+	postInfo: (filename, isPage) ->
+		file = if isPage is true then "#{@pagesDir}#{filename}" else @postPath filename
+		content = fs.readFileSync(file).toString()
 		hash = md5 content
 		content = content.split '\n\n'
 		top = content.shift().split '\n'
-
 		post =
 			name: filename
 			title: top[0]
@@ -122,6 +127,10 @@ Hey = module.exports = class
 				parts[1]
 
 		post.permalink = @permalink post.published, post.slug if post.published
+
+		if isPage is true
+			post.slug += '/'
+			post.type = 'page'
 
 		post
 
@@ -152,16 +161,15 @@ Hey = module.exports = class
 		date = new Date pubDate
 		"/#{date.toFormat 'YYYY/MM/DD'}/#{slug}/"
 
-
 	build: (callback) ->
 		@update =>
 			for post in @cache when 'published' in _.keys post
-				path = @postDir post.published, post.slug
-				mkdirp.sync path unless fs.existsSync path
-				fs.writeFileSync "#{path}/index.html", @render([post]), 'utf8'
+				dir = @postDir post.published, post.slug
+				mkdirp.sync dir unless fs.existsSync dir
+				fs.writeFileSync "#{dir}/index.html", @render([post]), 'utf8'
 				yes
 
-			@buildIndex callback?
+			@buildIndex()
 
 		yes
 
@@ -169,8 +177,37 @@ Hey = module.exports = class
 		index = @config.postsOnHomePage - 1
 		posts = @cache[0..index].filter (p) -> 'published' in _.keys p
 		fs.writeFileSync "#{@cwd}site/index.html", @render(posts), 'utf8'
-		callback?()
+		@buildRss posts
+		@buildPages()
 		yes
+
+	buildRss: (posts, callback) ->
+		feed = new rss
+			title: @config.siteTitle
+			description: @config.description
+			feed_url: "#{@config.site}/rss.xml"
+			site_url: @config.site
+			author: @config.author
+
+		for post in posts
+			feed.item
+				title: post.title
+				description: post.body
+				url: "#{@config.site}#{post.permalink}"
+				date: post.published
+
+		fs.writeFileSync @rssFile, feed.xml(), 'utf8'
+
+		callback?()
+
+		yes
+
+	buildPages: (callback) ->
+		for page in @pageFiles()
+			data = @postInfo page, yes
+			pageDir = "#{@siteDir}#{data.slug}"
+			mkdirp pageDir
+			fs.writeFileSync "#{pageDir}index.html", @render([data]), 'utf8'
 
 	markup: (content) ->
 		content = marked(content).trim()
@@ -181,7 +218,8 @@ Hey = module.exports = class
 		do @loadTemplate
 		options = _.omit @config, 'server'
 		options.siteTitle = @pageTitle if posts.length is 1 then posts[0].title else ''
-		@template _.extend options, posts: posts
+		html = @template _.extend options, posts: posts
+		html.replace /\n|\r|\t/g, ''
 
 	pageTitle: (postTitle) ->
 		if postTitle then "#{postTitle} | #{@config.siteTitle}" else @config.siteTitle
@@ -192,7 +230,7 @@ Hey = module.exports = class
 			'  "siteTitle": "Hey, Coffee! Jack!",'
 			'  "author": "Si Rob",'
 			'  "description": "My awesome blog, JACK!",'
-			'  "site": "yoursite.com",'
+			'  "site": "http://yoursite.com",'
 			'  "postsOnHomePage": 20,'
 			'  "server": "user@yoursite.com:/path/to/your/blog",'
 			'  "port": 22'
