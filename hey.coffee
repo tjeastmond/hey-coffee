@@ -31,6 +31,7 @@ Hey = module.exports = class
 		if fs.existsSync(@configFile) and fs.existsSync(@postPath())
 			console.log 'A blog is already setup here'
 			return false
+
 		mkdirp @siteDir
 		mkdirp @pagesDir
 		mkdirp @postPath()
@@ -105,6 +106,11 @@ Hey = module.exports = class
 	pageFiles: ->
 		readDir @pagesDir
 
+	setType: (post) ->
+		return post unless post.type
+		post["is#{ucWord post.type}"] = true
+		post
+
 	postInfo: (filename, isPage) ->
 		file = if isPage is true then "#{@pagesDir}#{filename}" else @postPath filename
 		content = fs.readFileSync(file).toString()
@@ -132,7 +138,7 @@ Hey = module.exports = class
 			post.slug += '/'
 			post.type = 'page'
 
-		post
+		@setType post
 
 	update: (callback) ->
 		do @loadConfig
@@ -280,4 +286,8 @@ readDir = (dir) ->
 
 md5 = (string) ->
 	crypto.createHash('md5').update(string).digest('hex')
+
+ucWord = (string) ->
+	string.charAt(0).toUpperCase() + string.slice 1
+
 
