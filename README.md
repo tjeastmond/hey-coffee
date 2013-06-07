@@ -2,19 +2,19 @@
 
 **These docs are a work in progress**
 
-This is a simple flatfile blog tool. Write your posts with Markdown, and publish via the commandline.
+This is a simple flatfile blog tool. Write your posts with markdown, and publish via the commandline.
 
 Just to be clear, this blog tool isn't for you if you need a CMS with more features then you'll ever know about. There is no web based interface. Hey.coffee generates flat HTML files, and then rsyncs those files to your web server.
 
 Generated files are placed in the **site/** folder. Anything you place there, including additional folders and files, will be sent up to your server.
 
+## Installing
+
+	> npm install -g hey-coffee
+
 Once you have Hey.coffee installed, you can open a shell and run the following command to get info on how to use it:
 
 	> hey --help
-
-## Installing
-
-Coming soon...will be npm.
 
 ### Requirements
 
@@ -33,7 +33,7 @@ To setup a new blog, create an empty directory and run this command:
 
 This script will generate the base structure of your new blog:
 
-- Posts directory: Save your Markdown posts here. A sample is created by the init command
+- Posts directory: Save your markdown posts here. A sample is created by the init command
 - Pages directory: Save your pages here
 - hey-config.json: Open this file and configure it. More on this to follow
 - hey-cache.json: Hey.coffee uses this file to store your processed posts
@@ -50,10 +50,12 @@ So in this file we have some pretty basic parameters that need setting:
 - **server:** For the rsync: user@yoursite.com:/path/to/blog
 - **port:** The ssh port...22 is usually the safe bet
 
+Everything except the server parameter will be passed down to your templates, so if you want to add a copyright or anything else this a good place to do it.
+
 
 ## Posts
 
-Posts are simply Markdown files in the **posts/** directory. The name of the file will become part of the post's URL (ex: test-post.md will have a slug of /2013/04/22/test-post).
+Posts are simply markdown files in the **posts/** directory. The name of the file will become part of the post's URL (ex: test-post.md will have a slug of /2013/04/22/test-post).
 
 The first line is the post's title, and right under that is where you can place some key/value pairs that will be treated as variables and passed down to your template.
 
@@ -67,13 +69,13 @@ The first line is the post's title, and right under that is where you can place 
 
 	And a second paragraph for good meassure.
 
-So in the example above, you'll have a title of: "Post Title". The template will also have access to variables: type and tags. You can practically put anything here and it will be passed down to the template.
+So in the example above, you'll have a title of: "Post Title". The template will also have access to variables: type and tags. You can put practically anything here and it will be passed down to the template.
 
 Some variables have special meaning to Hey.coffee, and affects how it works:
 
 - **Type:**  Hey.coffee will check for the type variable in your posts and create a variable with a value of true for use in your templates. If you have a type of *link* in your post file, your template will get a variable named *isLink*
 - **Tags:** This field isn't required, but when it is it should be a comma seperated list
-- **Published:** This variable will let Hey.coffee know when your story should be published, and what order to display your posts in. If this variable isn't included in your Markdown file, it won't be published to the front page of your site. It must also be in this format: 2013-03-27 12:00:00
+- **Published:** This variable will let Hey.coffee know when your story should be published, and what order to display your posts in. If this variable isn't included in your markdown file, it won't be published to the front page of your site. It must also be in this format: 2013-03-27 12:00:00
 
 ## Pages
 
