@@ -4,9 +4,13 @@
 
 This is a simple flatfile blog tool. Write your posts with Markdown, and publish via the commandline.
 
+Just to be clear, this blog tool isn't for you if you need a CMS with more features then you'll ever know about. There is no web based interface. Hey.coffee generates flat HTML files, and then rsyncs those files to your web server.
+
+Generated files are placed in the **site/** folder. Anything you place there, including additional folders and files, will be sent up to your server.
+
 Once you have Hey.coffee installed, you can open a shell and run the following command to get info on how to use it:
 
-	hey --help
+	> hey --help
 
 ## Installing
 
@@ -20,6 +24,32 @@ Hey.coffee was written in...CoffeeScript. So the basic requirements to run this 
 - CoffeeScript installed globally (npm install -g coffee-script)
 
 You will of course need a webserver somewhere for Hey.coffee to post your generated website to. That host should allow you access to rsync.
+
+## Getting Started
+
+To setup a new blog, create an empty directory and run this command:
+
+	> hey --init
+
+This script will generate the base structure of your new blog:
+
+- Posts directory: Save your Markdown posts here. A sample is created by the init command
+- Pages directory: Save your pages here
+- hey-config.json: Open this file and configure it. More on this to follow
+- hey-cache.json: Hey.coffee uses this file to store your processed posts
+
+### hey-config.json
+
+So in this file we have some pretty basic parameters that need setting:
+
+- **siteTitle:** The name of your blog
+- **author:** Your name as it will appear in your rss feed
+- **description:** Your site's description as it will appear in your rss feed
+- **site:** Your site's URL. Should include 'http://' and have no trailing slash
+- **postsOnHomePage:** The number of posts on your home page
+- **server:** For the rsync: user@yoursite.com:/path/to/blog
+- **port:** The ssh port...22 is usually the safe bet
+
 
 ## Posts
 
@@ -47,7 +77,7 @@ Some variables have special meaning to Hey.coffee, and affects how it works:
 
 ## Pages
 
-Pages are pretty much the same deal as posts. You place them in the **pages/** directory, and the same rules regarding variables apply with the exception of the *published* variable. The published variable is not required.
+Pages are pretty much the same deal as posts. You place them in the **pages/** directory, and the same rules regarding variables apply with the exception of *published*. The published variable is not required.
 
 ## To Do
 
