@@ -1,18 +1,20 @@
 {
   "name": "hey-coffee",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Simple flatfile blog",
   "main": "index.coffee",
   "scripts": {
     "test": "make test"
   },
-  "repository": "",
+  "repository": "git://github.com/tjeastmond/hey-coffee.git",
   "keywords": [
     "blog",
     "flatfile",
     "coffee",
     "cms",
-    "site"
+    "site",
+    "coffeescript",
+    "website"
   ],
   "dependencies": {
   	"coffee-script": "*",
