@@ -132,7 +132,11 @@ Hey = module.exports = class
 			else
 				parts[1]
 
-		post.permalink = @permalink post.published, post.slug if post.published
+		if post.published
+			date = new Date post.published
+			post.prettyDate = date.toFormat @config.prettyDateFormat
+			post.ymd = date.toFormat @config.ymdFormat
+			post.permalink = @permalink post.published, post.slug
 
 		if isPage is true
 			post.slug += '/'
@@ -239,7 +243,9 @@ Hey = module.exports = class
 			'  "site": "http://yoursite.com",'
 			'  "postsOnHomePage": 20,'
 			'  "server": "user@yoursite.com:/path/to/your/blog",'
-			'  "port": 22'
+			'  "port": 22,'
+			'  "prettyDateFormat": "DDDD, DD MMMM YYYY",'
+			'  "ymdFormat": "YYYY-MM-DD"'
 			'}'
 		].join '\n'
 
