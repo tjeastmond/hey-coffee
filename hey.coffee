@@ -123,6 +123,7 @@ Hey = module.exports = class
 			slug: path.basename filename, '.md'
 			hash: hash
 			body: @markup content.join '\n\n'
+			tags: []
 
 		for setting in top[2..]
 			parts = setting.split ': '
@@ -179,7 +180,8 @@ Hey = module.exports = class
 				fs.writeFileSync "#{dir}/index.html", @render([post]), 'utf8'
 				yes
 
-			@buildIndex()
+			do @buildIndex
+			do @buildTags
 
 		yes
 
@@ -218,6 +220,20 @@ Hey = module.exports = class
 			pageDir = "#{@siteDir}#{data.slug}"
 			mkdirp pageDir
 			fs.writeFileSync "#{pageDir}index.html", @render([data]), 'utf8'
+
+	buildTags: (callback) ->
+		@tags = {}
+		for post in @cache when post.tags.length > 0
+			for tag in post.tags
+				@tags[tag] = [] unless _.has @tags, tag
+				@tags[tag].push post
+
+		for tag, posts of @tags
+			tagDir = "#{@siteDir}tags/#{tag}/"
+			mkdirp tagDir unless fs.existsSync tagDir
+			fs.writeFileSync "#{tagDir}index.html", @render(posts), 'utf8'
+
+		callback?()
 
 	markup: (content) ->
 		content = marked(content).trim()

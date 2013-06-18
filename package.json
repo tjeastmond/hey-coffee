@@ -1,6 +1,6 @@
 {
   "name": "hey-coffee",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Simple flatfile blog",
   "main": "index.coffee",
   "scripts": {
