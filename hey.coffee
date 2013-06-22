@@ -47,13 +47,12 @@ Hey = module.exports = class
 		server = http.createServer (req, res) =>
 			uri = url.parse(req.url).pathname
 			filename = path.join "#{@cwd}site", uri
-			return false if uri is '/favicon.ico'
 			fs.exists filename, (exists) ->
-				if not exists
+				if exists is false
 					res.writeHead 404, 'Content-Type': 'text/plain'
 					res.write '404 Not Found\n'
 					res.end()
-					false
+					return false
 
 				filename += '/index.html' if fs.statSync(filename).isDirectory()
 
@@ -62,7 +61,7 @@ Hey = module.exports = class
 						res.writeHead 500, 'Content-Type': 'text/plain'
 						res.write error + "\n"
 						res.end()
-						false
+						return false
 
 					res.writeHead 200
 					res.write file, 'binary'
@@ -138,6 +137,7 @@ Hey = module.exports = class
 			post.prettyDate = date.toFormat @config.prettyDateFormat
 			post.ymd = date.toFormat @config.ymdFormat
 			post.permalink = @permalink post.published, post.slug
+			post.archiveDir = post.published[0..6]
 
 		if isPage is true
 			post.slug += '/'
@@ -156,7 +156,7 @@ Hey = module.exports = class
 			@cache[i] = current if post.hash isnt current.hash
 
 		@cache.push @postInfo(post) for post in posts when post not in cacheFiles
-		@cache = _.sortBy @cache, (post) -> (if post.published then new Date(post.published) else 0) * -1
+		@cache = _.sortBy @cache, (post) ->(if post.published then new Date(post.published) else 0) * -1
 
 		fs.writeFileSync @cacheFile, JSON.stringify @cache
 
@@ -174,26 +174,25 @@ Hey = module.exports = class
 
 	build: (callback) ->
 		@update =>
-			for post in @cache when 'published' in _.keys post
+			writePostFile = (post, next) =>
+				return next null unless _.has post, 'published'
 				dir = @postDir post.published, post.slug
 				mkdirp.sync dir unless fs.existsSync dir
-				fs.writeFileSync "#{dir}/index.html", @render([post]), 'utf8'
-				yes
+				fs.writeFile "#{dir}/index.html", @render([post]), 'utf8'
+				do next
 
-			do @buildIndex
-			do @buildTags
+			async.each @cache, writePostFile, (error) =>
+				async.parallel [@buildArchive, @buildTags, @buildIndex, @buildPages], (error) ->
+					callback?()
 
-		yes
-
-	buildIndex: (callback) ->
+	buildIndex: (callback) =>
 		index = @config.postsOnHomePage - 1
-		posts = @cache[0..index].filter (p) -> 'published' in _.keys p
+		posts = @cache.filter((p) -> 'published' in _.keys p)[0..index]
 		fs.writeFileSync "#{@cwd}site/index.html", @render(posts), 'utf8'
 		@buildRss posts
-		@buildPages()
-		yes
+		callback?(null)
 
-	buildRss: (posts, callback) ->
+	buildRss: (posts, callback) =>
 		feed = new rss
 			title: @config.siteTitle
 			description: @config.description
@@ -210,18 +209,18 @@ Hey = module.exports = class
 
 		fs.writeFileSync @rssFile, feed.xml(), 'utf8'
 
-		callback?()
+		callback?(null)
 
-		yes
-
-	buildPages: (callback) ->
+	buildPages: (callback) =>
 		for page in @pageFiles()
 			data = @postInfo page, yes
 			pageDir = "#{@siteDir}#{data.slug}"
-			mkdirp pageDir
+			mkdirp.sync pageDir
 			fs.writeFileSync "#{pageDir}index.html", @render([data]), 'utf8'
 
-	buildTags: (callback) ->
+		callback?(null)
+
+	buildTags: (callback) =>
 		@tags = {}
 		for post in @cache when post.tags.length > 0
 			for tag in post.tags
@@ -233,7 +232,20 @@ Hey = module.exports = class
 			mkdirp tagDir unless fs.existsSync tagDir
 			fs.writeFileSync "#{tagDir}index.html", @render(posts), 'utf8'
 
-		callback?()
+		callback?(null)
+
+	buildArchive: (callback) =>
+		@archive = {}
+		for post in @cache when 'published' in _.keys post
+			@archive[post.archiveDir] = [] unless _.has @archive, post.archiveDir
+			@archive[post.archiveDir].push post
+
+		for archiveDir, posts of @archive
+			archiveDir = "#{@siteDir}archives/#{archiveDir.replace('-', '/')}/"
+			mkdirp.sync archiveDir unless fs.existsSync archiveDir
+			fs.writeFileSync "#{archiveDir}index.html", @render(posts), 'utf8'
+
+		callback?(null)
 
 	markup: (content) ->
 		content = marked(content).trim()
@@ -293,7 +305,7 @@ Hey = module.exports = class
 			'</html>'
 		].join '\n'
 
-		{config, post, tpl}
+		{ config, post, tpl }
 
 # utility functions
 readJSON = (file) ->
