@@ -229,7 +229,7 @@ Hey = module.exports = class
 
 		for tag, posts of @tags
 			tagDir = "#{@siteDir}tags/#{tag}/"
-			mkdirp tagDir unless fs.existsSync tagDir
+			mkdirp.sync tagDir unless fs.existsSync tagDir
 			fs.writeFileSync "#{tagDir}index.html", @render(posts), 'utf8'
 
 		callback?(null)
