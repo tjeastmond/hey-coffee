@@ -7,6 +7,7 @@ path = require 'path'
 crypto = require 'crypto'
 http = require 'http'
 url = require 'url'
+{spawn, exec} = require 'child_process'
 async = require 'async'
 _ = require 'underscore'
 marked = require 'marked'
@@ -25,6 +26,7 @@ Hey = module.exports = class
 		@templateFile = "#{@cwd}template.html"
 		@pagesDir = "#{@cwd}pages/"
 		@siteDir = "#{@cwd}site/"
+		@publicDir = "#{@cwd}public/"
 		@rssFile = "#{@cwd}site/rss.xml"
 
 	init: ->
@@ -34,7 +36,9 @@ Hey = module.exports = class
 
 		mkdirp @siteDir
 		mkdirp @pagesDir
+		mkdirp @publicDir
 		mkdirp @postPath()
+
 		defaults = @defaults()
 		fs.writeFileSync @cacheFile, '', 'utf8'
 		fs.writeFileSync @templateFile, defaults.tpl, 'utf8'
@@ -76,7 +80,6 @@ Hey = module.exports = class
 		@rsync @siteDir, @config.server
 
 	rsync: (from, to, callback) ->
-		{spawn} = require 'child_process'
 		port = "ssh -p #{@config.port or 22}"
 		child = spawn "rsync", ['-vurz', '--delete', '-e', port, from, to]
 		child.stdout.on 'data', (out) -> console.log out.toString()
@@ -148,8 +151,11 @@ Hey = module.exports = class
 	update: (callback) ->
 		do @loadConfig
 		do @loadCache
-		cacheFiles = _.pluck @cache, 'name'
 		posts = @postFiles()
+
+		# remove any items not in posts
+		@cache = @cache.filter (item) -> item.name in posts
+		cacheFiles = _.pluck @cache, 'name'
 
 		for post, i in @cache
 			current = @postInfo post.name
@@ -174,16 +180,19 @@ Hey = module.exports = class
 
 	build: (callback) ->
 		@update =>
-			writePostFile = (post, next) =>
-				return next null unless _.has post, 'published'
-				dir = @postDir post.published, post.slug
-				mkdirp.sync dir unless fs.existsSync dir
-				fs.writeFile "#{dir}/index.html", @render([post]), 'utf8'
-				do next
+			exec "rsync -vur --delete public/ site", (err, stdout, stderr) =>
+				throw err if err
 
-			async.each @cache, writePostFile, (error) =>
-				async.parallel [@buildArchive, @buildTags, @buildIndex, @buildPages], (error) ->
-					callback?()
+				writePostFile = (post, next) =>
+					return next null unless _.has post, 'published'
+					dir = @postDir post.published, post.slug
+					mkdirp.sync dir unless fs.existsSync dir
+					fs.writeFile "#{dir}/index.html", @render([post]), 'utf8'
+					do next
+
+				async.each @cache, writePostFile, (error) =>
+					async.parallel [@buildArchive, @buildTags, @buildIndex, @buildPages], (error) ->
+						callback?()
 
 	buildIndex: (callback) =>
 		index = @config.postsOnHomePage - 1
