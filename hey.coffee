@@ -232,7 +232,7 @@ Hey = module.exports = class
 	buildTags: (callback) =>
 		@tags = {}
 		for post in @cache when post.tags.length > 0
-			for tag in post.tags
+			for tag in post.tags when _.has post, 'published'
 				@tags[tag] = [] unless _.has @tags, tag
 				@tags[tag].push post
 
