@@ -141,6 +141,7 @@ Hey = module.exports = class
 			post.ymd = date.toFormat @config.ymdFormat
 			post.permalink = @permalink post.published, post.slug
 			post.archiveDir = post.published[0..6]
+			post.canonical = @config.site + post.permalink
 
 		if isPage is true
 			post.slug += '/'
@@ -263,8 +264,16 @@ Hey = module.exports = class
 	render: (posts) ->
 		throw "Posts must be an array" unless _.isArray posts
 		do @loadTemplate
+
 		options = _.omit @config, 'server'
 		options.pageTitle = @pageTitle if posts.length is 1 then posts[0].title else ''
+
+		if posts.length is 1 and posts[0].type isnt 'page'
+			options.isArticle = true
+			options.opengraph = true
+			options.og_title = posts[0].title
+			options.og_canonical = posts[0].canonical
+
 		html = @template _.extend options, posts: posts
 		html.replace /\n|\r|\t/g, ''
 
