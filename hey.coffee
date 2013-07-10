@@ -14,6 +14,7 @@ marked = require 'marked'
 handlebars = require 'handlebars'
 mkdirp = require 'mkdirp'
 rss = require 'rss'
+colors = require 'colors'
 
 require 'date-utils'
 
@@ -72,7 +73,7 @@ Hey = module.exports = class
 					res.end()
 
 		server.listen 3000
-		console.log "Server running at http://localhost:3000"
+		console.log "Server running at http://localhost:3000".green
 		console.log "CTRL+C to stop it"
 
 	publish: ->
@@ -164,11 +165,8 @@ Hey = module.exports = class
 
 		@cache.push @postInfo(post) for post in posts when post not in cacheFiles
 		@cache = _.sortBy @cache, (post) ->(if post.published then new Date(post.published) else 0) * -1
-
 		fs.writeFileSync @cacheFile, JSON.stringify @cache
-
 		callback?()
-
 		yes
 
 	postDir: (pubDate, slug) ->

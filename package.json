@@ -25,7 +25,8 @@
   	"request": "*",
   	"handlebars": "*",
     "mkdirp": "0.3.5",
-    "rss": "*"
+    "rss": "*",
+    "colors": "*"
   },
   "devDependencies": {
   	"mocha": "*",
