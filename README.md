@@ -43,6 +43,7 @@ This script will generate the base structure of your new blog:
 So in this file we have some pretty basic parameters that need setting:
 
 - **siteTitle:** The name of your blog
+- **pageTitle:** The name of your blog prepended by an article title
 - **author:** Your name as it will appear in your rss feed
 - **description:** Your site's description as it will appear in your rss feed
 - **site:** Your site's URL. Should include 'http://' and have no trailing slash

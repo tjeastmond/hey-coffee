@@ -264,7 +264,7 @@ Hey = module.exports = class
 		throw "Posts must be an array" unless _.isArray posts
 		do @loadTemplate
 		options = _.omit @config, 'server'
-		options.siteTitle = @pageTitle if posts.length is 1 then posts[0].title else ''
+		options.pageTitle = @pageTitle if posts.length is 1 then posts[0].title else ''
 		html = @template _.extend options, posts: posts
 		html.replace /\n|\r|\t/g, ''
 
@@ -275,7 +275,7 @@ Hey = module.exports = class
 		config = [
 			'{'
 			'  "siteTitle": "Hey, Coffee! Jack!",'
-			'  "author": "Si Rob",'
+			'  "author": "Si",'
 			'  "description": "My awesome blog, JACK!",'
 			'  "site": "http://yoursite.com",'
 			'  "postsOnHomePage": 20,'
