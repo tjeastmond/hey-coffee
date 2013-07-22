@@ -47,8 +47,9 @@ Hey = module.exports = class
 		fs.writeFileSync @postPath('first-post.md'), defaults.post, 'utf8'
 		yes
 
-	server: ->
+	server: =>
 		do @loadConfig
+
 		server = http.createServer (req, res) =>
 			uri = url.parse(req.url).pathname
 			filename = path.join "#{@cwd}site", uri
@@ -74,7 +75,7 @@ Hey = module.exports = class
 
 		server.listen 3000
 		console.log "Server running at http://localhost:3000".green
-		console.log "CTRL+C to stop it"
+		console.log "CTRL+C to stop it".white
 
 	publish: ->
 		do @loadConfig
@@ -152,19 +153,10 @@ Hey = module.exports = class
 
 	update: (callback) ->
 		do @loadConfig
-		do @loadCache
 		posts = @postFiles()
-
-		# remove any items not in posts
-		@cache = @cache.filter (item) -> item.name in posts
-		cacheFiles = _.pluck @cache, 'name'
-
-		for post, i in @cache
-			current = @postInfo post.name
-			@cache[i] = current if post.hash isnt current.hash
-
-		@cache.push @postInfo(post) for post in posts when post not in cacheFiles
-		@cache = _.sortBy @cache, (post) ->(if post.published then new Date(post.published) else 0) * -1
+		@cache = []
+		@cache.push @postInfo(post) for post in posts
+		@cache = _.sortBy @cache, (post) -> (if post.published then new Date(post.published) else 0) * -1
 		fs.writeFileSync @cacheFile, JSON.stringify @cache
 		callback?()
 		yes
@@ -255,6 +247,25 @@ Hey = module.exports = class
 
 		callback?(null)
 
+	watch: (callback) =>
+		console.log 'Watching for changes and starting the server'.yellow
+		do @server
+
+		rebuild = (msg) => @build -> console.log "#{new Date().toFormat('HH24:MI:SS')} #{msg}".grey
+
+		handlePostsAndPages = (ev, filename) =>
+			rebuild 'Recompiling posts and pages' if filename and path.extname(filename) is '.md'
+
+		# watch posts and pages for changes
+		fs.watch @postPath(), handlePostsAndPages
+		fs.watch @pagesDir, handlePostsAndPages
+
+		fs.watchFile @templateFile, persistent: true, interval: 1000, (curr, prev) =>
+			@template = null
+			rebuild 'Recompiling template'
+
+		rebuild 'Built the site'
+
 	markup: (content) ->
 		content = marked(content).trim()
 		content.replace /\n/g, ""
@@ -339,5 +350,3 @@ md5 = (string) ->
 
 ucWord = (string) ->
 	string.charAt(0).toUpperCase() + string.slice 1
-
-

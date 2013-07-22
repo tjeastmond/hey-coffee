@@ -17,6 +17,7 @@ program.version(JSON.parse(fs.readFileSync(__dirname + '/../package.json').toStr
 	   .option('-b, --build', 'update the cache and build out blog')
 	   .option('-p, --publish', 'update webserver with new/updated blog files')
 	   .option('-s, --server', 'test server')
+	   .option('-w, --watch', 'test watch')
 	   .parse process.argv
 
 # run
@@ -24,3 +25,4 @@ do hey.build if program.build
 do hey.init if program.init
 do hey.publish if program.publish
 do hey.server if program.server
+do hey.watch if program.watch
