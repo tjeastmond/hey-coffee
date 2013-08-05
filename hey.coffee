@@ -19,9 +19,10 @@ colors = require 'colors'
 require 'date-utils'
 
 Hey = module.exports = class
-	constructor: () ->
-		@cwd = process.cwd() + "/"
+	constructor: (dir) ->
+		@cwd = dir or process.cwd() + "/"
 		@template = null
+		@webServer = null
 		@cacheFile = "#{@cwd}hey-cache.json"
 		@configFile = "#{@cwd}hey-config.json"
 		@templateFile = "#{@cwd}template.html"
@@ -47,10 +48,10 @@ Hey = module.exports = class
 		fs.writeFileSync @postPath('first-post.md'), defaults.post, 'utf8'
 		yes
 
-	server: =>
+	server: (silent, callback) =>
 		do @loadConfig
 
-		server = http.createServer (req, res) =>
+		@webServer = http.createServer (req, res) =>
 			uri = url.parse(req.url).pathname
 			filename = path.join "#{@cwd}site", uri
 			fs.exists filename, (exists) ->
@@ -73,9 +74,15 @@ Hey = module.exports = class
 					res.write file, 'binary'
 					res.end()
 
-		server.listen 3000
-		console.log "Server running at http://localhost:3000".green
-		console.log "CTRL+C to stop it".white
+		@webServer.listen 3000
+		if silent isnt true
+			console.log "Server running at http://localhost:3000".green
+			console.log "CTRL+C to stop it".white
+
+		callback?()
+
+	stopServer: (callback) ->
+		@webServer.close callback or ->
 
 	publish: ->
 		do @loadConfig
@@ -171,7 +178,7 @@ Hey = module.exports = class
 
 	build: (callback) ->
 		@update =>
-			exec "rsync -vur --delete public/ site", (err, stdout, stderr) =>
+			exec "rsync -vur --delete #{@publicDir} #{@siteDir}", (err, stdout, stderr) =>
 				throw err if err
 
 				writePostFile = (post, next) =>
@@ -292,7 +299,7 @@ Hey = module.exports = class
 	defaults: ->
 		config = [
 			'{'
-			'  "siteTitle": "Hey, Coffee! Jack!",'
+			'  "siteTitle": "Hey-coffee Blog",'
 			'  "author": "Si",'
 			'  "description": "My awesome blog, JACK!",'
 			'  "site": "http://yoursite.com",'
@@ -307,8 +314,9 @@ Hey = module.exports = class
 		post = [
 			'First Post'
 			'=========='
-			'Published: 2012-03-27 12:00:00'
+			'Published: 2013-04-22 12:00:00'
 			'Type: text'
+			'Tags: tests'
 			''
 			'This is a test post.'
 			''
@@ -323,10 +331,10 @@ Hey = module.exports = class
 			'	</head>'
 			'	<body>'
 			'		{{#each posts}}'
-			'		<div>'
+			'		<article>'
 			'			<h2><a href="{{permalink}}">{{title}}</a></h2>'
 			'			{{{body}}}'
-			'		</div>'
+			'		</article>'
 			'		{{/each}}'
 			'	</body>'
 			'</html>'
