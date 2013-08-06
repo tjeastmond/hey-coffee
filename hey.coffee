@@ -128,12 +128,14 @@ Hey = module.exports = class
 		hash = md5 content
 		content = content.split '\n\n'
 		top = content.shift().split '\n'
+		body = content.join '\n\n'
 		post =
 			name: filename
 			title: top[0]
 			slug: path.basename filename, '.md'
 			hash: hash
-			body: @markup content.join '\n\n'
+			body: @markup body
+			summary: @summary body
 			tags: []
 
 		for setting in top[2..]
@@ -157,6 +159,12 @@ Hey = module.exports = class
 			post.type = 'page'
 
 		@setType post
+
+	# borrowed from Journo
+	summary: (body) ->
+		summary = _.find(marked.lexer(body), (token) -> token.type is 'paragraph')?.text
+		summary = summary[0..summary.length - 2]
+		marked.parser marked.lexer _.template("#{summary}...")(summary)
 
 	update: (callback) ->
 		do @loadConfig
