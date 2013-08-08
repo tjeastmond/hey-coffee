@@ -17,7 +17,7 @@ program.version(JSON.parse(fs.readFileSync(__dirname + '/../package.json').toStr
 	   .option('-b, --build', 'update the cache and build out blog')
 	   .option('-p, --publish', 'update webserver with new/updated blog files')
 	   .option('-s, --server', 'test server')
-	   .option('-w, --watch', 'test watch')
+	   .option('-w, --watch', 're-compile posts, pages and the template when they change')
 	   .parse process.argv
 
 # run

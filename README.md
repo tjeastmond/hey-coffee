@@ -29,7 +29,6 @@ Once you have Hey.coffee installed, you can open a shell and run the following c
 
 	> hey --help
 
-
 ## Getting Started
 
 To setup a new blog, create an empty directory and run this command:

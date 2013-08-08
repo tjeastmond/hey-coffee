@@ -1,6 +1,6 @@
 {
   "name": "hey-coffee",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Simple flatfile blog",
   "main": "index.coffee",
   "scripts": { "test": "make test" },
@@ -8,6 +8,7 @@
   "keywords": [
     "blog",
     "flatfile",
+    "flat file",
     "coffee",
     "cms",
     "site",
