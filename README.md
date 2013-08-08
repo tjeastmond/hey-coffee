@@ -38,23 +38,23 @@ To setup a new blog, create an empty directory and run this command:
 
 This will generate the base structure of your new blog:
 
-- Posts directory: Save your markdown posts here. A sample is created by the init command
-- Pages directory: Save your pages here
-- Public directory: Put your static content here (CSS, Images, JavaScript)
-- hey-config.json: Open this file and configure it. More on this to follow
-- hey-cache.json: Hey-coffee uses this file to store your processed posts
+- **Posts directory:** Save your markdown posts here. A sample is created by the init command
+- **Pages directory:** Save your pages here
+- **Public directory:** Put your static content here (CSS, Images, JavaScript)
+- **hey-config.json:** Open this file and configure it. More on this to follow
+- **hey-cache.json:** Hey-coffee uses this file to store your processed posts
 
 ### hey-config.json
 
 In this file we have some basic parameters that need setting:
 
-- siteTitle: The name of your blog
-- author: Your name as it will appear in your rss feed
-- description: Your site's description as it will appear in your rss feed
-- site: Your site's URL. Should include 'http://' and have no trailing slash
-- postsOnHomePage: The number of posts on your home page
-- server: For the rsync: user@yoursite.com:/path/to/blog
-- port: The ssh port. Usually 22
+- **siteTitle:** The name of your blog
+- **author:** Your name as it will appear in your rss feed
+- **description:** Your site's description as it will appear in your rss feed
+- **site:** Your site's URL. Should include 'http://' and have no trailing slash
+- **postsOnHomePage:** The number of posts on your home page
+- **server:** For the rsync: user@yoursite.com:/path/to/blog
+- **port:** The ssh port. Usually 22
 
 Everything except the server parameter will be passed down to your templates, so if you want to add a copyright or anything else this a good place to do it.
 
