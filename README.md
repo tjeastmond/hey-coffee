@@ -1,12 +1,25 @@
-# Hey.coffee
+# Hey-coffee
 
-**These docs are a work in progress**
+**These docs are very much a work in progress. As this software is still in its early stages, there will occasionally be a few things re-thought and refactored. Thanks for dealing with my bad behavior.**
 
-This is a simple flatfile blog tool. Write your posts with markdown, and publish via the commandline.
+Hey-coffee is a simple flatfile blog tool. Write your posts with markdown, and publish via the commandline. You place your post files in the posts directory, and anything static like CSS or JavaScript into the public/ directory. When the build command is called, these things happen:
 
-Just to be clear, this blog tool isn't for you if you need a CMS with more features then you'll ever know about. There is no web based interface. Hey.coffee generates flat HTML files, and then rsyncs those files to your web server.
+* The site folder is cleared
+* The contents of the public folder are rsync'd over to the site folder
+* All posts and pages are rendered to HTML
+* The index page is generated
+* Archive and tag pages are generated
 
-Generated files are placed in the **site/** folder. Anything you place there, including additional folders and files, will be sent up to your server.
+Simple! This workflow is great for me, as a developer I'm comfortable at the terminal. Hopefully you'll like it too.
+
+### Requirements
+
+Hey.coffee is written entirely in CoffeeScript. Requirments are few:
+
+- Node.js
+- CoffeeScript installed globally (npm install -g coffee-script)
+
+You will need a webserver somewhere for Hey-coffee to post your generated website to. That host should allow you access to rsync.
 
 ## Installing
 
@@ -16,14 +29,6 @@ Once you have Hey.coffee installed, you can open a shell and run the following c
 
 	> hey --help
 
-### Requirements
-
-Hey.coffee was written in...CoffeeScript. So the basic requirements to run this on your personal machine are:
-
-- Node.js
-- CoffeeScript installed globally (npm install -g coffee-script)
-
-You will of course need a webserver somewhere for Hey.coffee to post your generated website to. That host should allow you access to rsync.
 
 ## Getting Started
 
@@ -31,31 +36,31 @@ To setup a new blog, create an empty directory and run this command:
 
 	> hey --init
 
-This script will generate the base structure of your new blog:
+This will generate the base structure of your new blog:
 
 - Posts directory: Save your markdown posts here. A sample is created by the init command
 - Pages directory: Save your pages here
+- Public directory: Put your static content here (CSS, Images, JavaScript)
 - hey-config.json: Open this file and configure it. More on this to follow
-- hey-cache.json: Hey.coffee uses this file to store your processed posts
+- hey-cache.json: Hey-coffee uses this file to store your processed posts
 
 ### hey-config.json
 
-So in this file we have some pretty basic parameters that need setting:
+In this file we have some basic parameters that need setting:
 
-- **siteTitle:** The name of your blog
-- **author:** Your name as it will appear in your rss feed
-- **description:** Your site's description as it will appear in your rss feed
-- **site:** Your site's URL. Should include 'http://' and have no trailing slash
-- **postsOnHomePage:** The number of posts on your home page
-- **server:** For the rsync: user@yoursite.com:/path/to/blog
-- **port:** The ssh port...22 is usually the safe bet
+- siteTitle: The name of your blog
+- author: Your name as it will appear in your rss feed
+- description: Your site's description as it will appear in your rss feed
+- site: Your site's URL. Should include 'http://' and have no trailing slash
+- postsOnHomePage: The number of posts on your home page
+- server: For the rsync: user@yoursite.com:/path/to/blog
+- port: The ssh port. Usually 22
 
 Everything except the server parameter will be passed down to your templates, so if you want to add a copyright or anything else this a good place to do it.
 
-
 ## Posts
 
-Posts are simply markdown files in the **posts/** directory. The name of the file will become part of the post's URL (ex: test-post.md will have a slug of /2013/04/22/test-post).
+Posts are markdown files in the **posts/** directory. The name of the file will become part of the post's URL (ex: test-post.md will have a slug of /2013/04/22/test-post).
 
 The first line is the post's title, and right under that is where you can place some key/value pairs that will be treated as variables and passed down to your template.
 
@@ -69,22 +74,23 @@ The first line is the post's title, and right under that is where you can place 
 
 	And a second paragraph for good meassure.
 
-So in the example above, you'll have a title of: "Post Title". The template will also have access to variables: type and tags. You can put practically anything here and it will be passed down to the template.
+In the example above, you'll have a title of: "Post Title". The template will also have access to variables: type and tags. You can put practically anything here and it will be passed down to the template.
 
-Some variables have special meaning to Hey.coffee, and affects how it works:
+### Reserved Variables
+
+Some variables have special meaning to Hey-coffee, and affects how it works:
 
 - **Type:**  Hey.coffee will check for the type variable in your posts and create a variable with a value of true for use in your templates. If you have a type of *link* in your post file, your template will get a variable named *isLink*
 - **Tags:** This field isn't required, but when it is it should be a comma seperated list
-- **Published:** This variable will let Hey.coffee know when your story should be published, and what order to display your posts in. If this variable isn't included in your markdown file, it won't be published to the front page of your site. It must also be in this format: 2013-03-27 12:00:00
+- **Published:** This variable will let Hey-coffee know how to sort your posts. If this variable isn't included, the post won't be published to the front page. It must be in the format: 2013-03-27 23:00:00
 
 ## Pages
 
-Pages are pretty much the same deal as posts. You place them in the **pages/** directory, and the same rules regarding variables apply with the exception of *published*. The published variable is not required.
+Pages are pretty much the same deal as posts. You place them in the **pages/** directory, and the same rules regarding variables apply with the exception of *published*. The published variable is not required. Pages also get a special _isPage_ variable passed to the template.
 
 ## To Do
 
-- Generate Makefile
-- Write tests
+- Finish docs
 
 ## The License (MIT)
 Copyright (c) 2013 TJ Eastmond
