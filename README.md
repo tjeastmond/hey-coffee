@@ -1,6 +1,6 @@
 # Hey-coffee
 
-**These docs are very much a work in progress. As this software is still in its early stages, there will occasionally be a few things re-thought and refactored. Thanks for dealing with my bad behavior.**
+**These docs are a work in progress. As this software is still in its early stages, there will occasionally be a few things re-thought and refactored. Thanks for dealing with my bad behavior.**
 
 Hey-coffee is a simple flatfile blog tool. Write your posts with markdown, and publish via the commandline. You place your post files in the posts directory, and anything static like CSS or JavaScript into the public/ directory. When the build command is called, these things happen:
 
@@ -87,9 +87,13 @@ Some variables have special meaning to Hey-coffee, and affects how it works:
 
 Pages are pretty much the same deal as posts. You place them in the **pages/** directory, and the same rules regarding variables apply with the exception of *published*. The published variable is not required. Pages also get a special _isPage_ variable passed to the template.
 
-## To Do
+## Change Log
 
-- Finish docs
+__v0.5.2 - 2014/08/22__
+
+- Pages that now display multiple posts get an "isIndex" variable passed down to template
+- Templates now get a variable called "archiveList" that contains a JSON object of links to monthly landing pages
+- Moved monthly archive "index.html" files to "/year/month/index.html" instead of nesting in another "archives" directory
 
 ## The License (MIT)
 Copyright (c) 2013 TJ Eastmond

@@ -196,8 +196,16 @@ Hey = module.exports = class
 					fs.writeFile "#{dir}/index.html", @render([post]), 'utf8'
 					do next
 
+				process = [
+					@buildArchive
+					@buildArchiveList
+					@buildTags
+					@buildIndex
+					@buildPages
+				]
+
 				async.each @cache, writePostFile, (error) =>
-					async.parallel [@buildArchive, @buildTags, @buildIndex, @buildPages], (error) ->
+					async.parallel process, (error) ->
 						callback?()
 
 	buildIndex: (callback) =>
@@ -224,7 +232,7 @@ Hey = module.exports = class
 
 		fs.writeFileSync @rssFile, feed.xml(), 'utf8'
 
-		callback?(null)
+		callback? null
 
 	buildPages: (callback) =>
 		for page in @pageFiles()
@@ -233,7 +241,7 @@ Hey = module.exports = class
 			mkdirp.sync pageDir
 			fs.writeFileSync "#{pageDir}index.html", @render([data]), 'utf8'
 
-		callback?(null)
+		callback? null
 
 	buildTags: (callback) =>
 		@tags = {}
@@ -256,11 +264,21 @@ Hey = module.exports = class
 			@archive[post.archiveDir].push post
 
 		for archiveDir, posts of @archive
-			archiveDir = "#{@siteDir}archives/#{archiveDir.replace('-', '/')}/"
+			archiveDir = "#{@siteDir}#{archiveDir.replace('-', '/')}/"
 			mkdirp.sync archiveDir unless fs.existsSync archiveDir
 			fs.writeFileSync "#{archiveDir}index.html", @render(posts), 'utf8'
 
 		callback?(null)
+
+	buildArchiveList: (callback) =>
+		@archiveIndex = []
+		posts = @cache.filter (post) -> _.has post, 'published'
+		for archive in _.uniq _.pluck posts, 'archiveDir'
+			@archiveIndex.push
+				name: new Date(archive.replace /-/g, ' ').toFormat 'MMMM YYYY'
+				link: "/#{archive.replace('-', '/')}/"
+
+		_.sortBy @archiveIndex, (result) -> result.link.replace '/', ''
 
 	watch: (callback) =>
 		console.log 'Watching for changes and starting the server'.yellow
@@ -291,12 +309,15 @@ Hey = module.exports = class
 
 		options = _.omit @config, 'server'
 		options.pageTitle = @pageTitle if posts.length is 1 then posts[0].title else ''
+		options.archiveList = @archiveList()
 
 		if posts.length is 1 and posts[0].type isnt 'page'
 			options.isArticle = true
 			options.opengraph = true
 			options.og_title = posts[0].title
 			options.og_canonical = posts[0].canonical
+
+		options.isIndex = true if posts.length > 1
 
 		html = @template _.extend options, posts: posts
 		html.replace /\n|\r|\t/g, ''
