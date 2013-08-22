@@ -309,7 +309,7 @@ Hey = module.exports = class
 
 		options = _.omit @config, 'server'
 		options.pageTitle = @pageTitle if posts.length is 1 then posts[0].title else ''
-		options.archiveList = @archiveList()
+		options.archiveList = @archiveIndex
 
 		if posts.length is 1 and posts[0].type isnt 'page'
 			options.isArticle = true
