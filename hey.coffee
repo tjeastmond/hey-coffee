@@ -280,6 +280,8 @@ Hey = module.exports = class
 
 		_.sortBy @archiveIndex, (result) -> result.link.replace '/', ''
 
+		callback?()
+
 	watch: (callback) =>
 		console.log 'Watching for changes and starting the server'.yellow
 		do @server
