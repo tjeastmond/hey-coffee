@@ -224,9 +224,10 @@ Hey = module.exports = class
 			author: @config.author
 
 		for post in posts
+			body = if _.has post, 'image' then "<p><img src='#{post.image}' /></p>#{post.body}" else post.body
 			feed.item
 				title: post.title
-				description: post.body
+				description: body
 				url: "#{@config.site}#{post.permalink}"
 				date: post.published
 
