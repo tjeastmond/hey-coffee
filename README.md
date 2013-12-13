@@ -87,13 +87,9 @@ Some variables have special meaning to Hey-coffee, and affects how it works:
 
 Pages are pretty much the same deal as posts. You place them in the **pages/** directory, and the same rules regarding variables apply with the exception of *published*. The published variable is not required. Pages also get a special _isPage_ variable passed to the template.
 
-## Change Log
+## ChangeLog
 
-__v0.5.2 - 2014/08/22__
-
-- Pages that now display multiple posts get an "isIndex" variable passed down to template
-- Templates now get a variable called "archiveList" that contains a JSON object of links to monthly landing pages
-- Moved monthly archive "index.html" files to "/year/month/index.html" instead of nesting in another "archives" directory
+The changelog can be found [here](https://github.com/tjeastmond/hey-coffee/blob/master/CHANGELOG.md).
 
 ## The License (MIT)
 Copyright (c) 2013 TJ Eastmond

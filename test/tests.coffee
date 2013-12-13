@@ -20,12 +20,12 @@ create_new_blog = ->
 
 describe 'Hey-coffee', ->
 	before -> @hey = new Hey
-	it 'exists', -> @hey.should.be.a 'object'
+	it 'exists', -> @hey.should.be.an.Object
 	it 'should have the methods the CLI depends on', ->
-		@hey.init.should.be.a 'function'
-		@hey.server.should.be.a 'function'
-		@hey.publish.should.be.a 'function'
-		@hey.watch.should.be.a 'function'
+		@hey.init.should.be.type 'function'
+		@hey.server.should.be.type 'function'
+		@hey.publish.should.be.type 'function'
+		@hey.watch.should.be.type 'function'
 
 describe 'Creating a blog', ->
 	before -> create_new_blog.call this
@@ -53,6 +53,5 @@ describe 'Building a blog', ->
 	it 'should create HTML files', (done) ->
 		fs.existsSync("#{blogDir}site/index.html").should.be.true
 		fs.existsSync("#{blogDir}site/2013/04/22/first-post/index.html").should.be.true
-		fs.existsSync("#{blogDir}site/archives/2013/04/index.html").should.be.true
 		fs.existsSync("#{blogDir}site/tags/tests/index.html").should.be.true
 		do done

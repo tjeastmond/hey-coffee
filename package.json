@@ -1,6 +1,6 @@
 {
   "name": "hey-coffee",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Simple flatfile blog",
   "main": "index.coffee",
   "scripts": { "test": "make test" },
@@ -13,24 +13,26 @@
     "cms",
     "site",
     "coffeescript",
+    "coffee-script",
     "website",
-    "underscore"
+    "underscore",
+    "static"
   ],
   "dependencies": {
-  	"coffee-script": "*",
-  	"async": "*",
-  	"underscore": "*",
-  	"marked": "*",
-  	"commander": "*",
-  	"date-utils": "*",
-  	"handlebars": "*",
-    "mkdirp": "0.3.5",
-    "rss": "*",
-    "colors": "*"
+  	"coffee-script": "~1.6.3",
+  	"async": "~0.2.9",
+  	"underscore": "~1.5.2",
+  	"marked": "~0.2.10",
+  	"commander": "~2.1.0",
+  	"date-utils": "~1.2.14",
+  	"handlebars": "~1.1.2",
+    "mkdirp": "~0.3.5",
+    "rss": "~0.2.1",
+    "colors": "~0.6.2"
   },
   "devDependencies": {
-  	"mocha": "*",
-  	"should": "*"
+  	"mocha": "~1.15.1",
+  	"should": "~2.1.1"
   },
   "bin": {
     "hey": "./bin/hey"
