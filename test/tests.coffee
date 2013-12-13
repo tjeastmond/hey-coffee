@@ -13,10 +13,11 @@ blogDir = process.cwd() + '/test/blog/'
 # misc functions
 create_blog_folder = ->	mkdirp.sync blogDir
 delete_blog_folder = (callback) -> exec "rm -rf #{blogDir}", callback
-create_new_blog = ->
+create_new_blog = (callback) ->
 	do create_blog_folder
 	@hey = new Hey blogDir
 	do @hey.init
+	callback?()
 
 describe 'Hey-coffee', ->
 	before -> @hey = new Hey
@@ -30,7 +31,8 @@ describe 'Hey-coffee', ->
 describe 'Creating a blog', ->
 	before -> create_new_blog.call this
 	after (done) -> delete_blog_folder done
-	it 'should create a config file', ->fs.existsSync(@hey.configFile).should.be.true
+	it 'should throw an error if a blog already exists', -> (=> @hey.init()).should.throw()
+	it 'should create a config file', -> fs.existsSync(@hey.configFile).should.be.true
 	it 'should create a posts directory', -> fs.existsSync(@hey.postPath()).should.be.true
 	it 'should create a pages directory', -> fs.existsSync(@hey.pagesDir).should.be.true
 	it 'should create a public directory', -> fs.existsSync(@hey.publicDir).should.be.true

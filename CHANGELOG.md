@@ -1,3 +1,9 @@
+## 0.5.7
+
+Features:
+  - Switched some tasks to be async instead of sync
+  - Added a test condition to watch for an exception when trying to create a site in a directory that has one already
+
 ## 0.5.6
 
 Features:

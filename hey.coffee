@@ -33,8 +33,7 @@ Hey = module.exports = class
 
 	init: ->
 		if fs.existsSync(@configFile) and fs.existsSync(@postPath())
-			console.log 'A blog is already setup here'
-			return false
+			throw new Error 'A blog is already setup here'
 
 		mkdirp @siteDir
 		mkdirp @pagesDir
@@ -42,6 +41,7 @@ Hey = module.exports = class
 		mkdirp @postPath()
 
 		defaults = @defaults()
+
 		fs.writeFileSync @cacheFile, '', 'utf8'
 		fs.writeFileSync @templateFile, defaults.tpl, 'utf8'
 		fs.writeFileSync @configFile, defaults.config, 'utf8'
@@ -160,7 +160,6 @@ Hey = module.exports = class
 
 		@setType post
 
-	# borrowed from Journo
 	summary: (body) ->
 		summary = _.find(marked.lexer(body), (token) -> token.type is 'paragraph')?.text
 		summary = summary[0..summary.length - 2]
@@ -168,21 +167,24 @@ Hey = module.exports = class
 
 	update: (callback) ->
 		do @loadConfig
-		posts = @postFiles()
 		@cache = []
-		@cache.push @postInfo(post) for post in posts
+		@cache.push @postInfo(post) for post in @postFiles()
 		@cache = _.sortBy @cache, (post) -> (if post.published then new Date(post.published) else 0) * -1
-		fs.writeFileSync @cacheFile, JSON.stringify @cache
-		callback?()
+		fs.writeFile @cacheFile, JSON.stringify(@cache), (error) ->
+			throw new Error error if error?
+			callback?()
+
 		yes
 
-	postDir: (pubDate, slug) ->
+	ymd: (pubDate) ->
 		date = new Date pubDate
-		"#{@cwd}site/#{date.toFormat 'YYYY/MM/DD'}/#{slug}"
+		date.toFormat 'YYYY/MM/DD'
+
+	postDir: (pubDate, slug) ->
+		"#{@cwd}site/#{@ymd(pubDate)}/#{slug}"
 
 	permalink: (pubDate, slug) ->
-		date = new Date pubDate
-		"/#{date.toFormat 'YYYY/MM/DD'}/#{slug}/"
+		"/#{@ymd(pubDate)}/#{slug}/"
 
 	build: (callback) ->
 		@update =>
@@ -211,7 +213,7 @@ Hey = module.exports = class
 	buildIndex: (callback) =>
 		index = @config.postsOnHomePage - 1
 		posts = @cache.filter((p) -> 'published' in _.keys p)[0..index]
-		fs.writeFileSync "#{@cwd}site/index.html", @render(posts), 'utf8'
+		fs.writeFile "#{@cwd}site/index.html", @render(posts), 'utf8'
 		@buildRss posts
 		callback?(null)
 
@@ -231,7 +233,7 @@ Hey = module.exports = class
 				url: "#{@config.site}#{post.permalink}"
 				date: post.published
 
-		fs.writeFileSync @rssFile, feed.xml(), 'utf8'
+		fs.writeFile @rssFile, feed.xml(), 'utf8'
 
 		callback? null
 
@@ -239,8 +241,9 @@ Hey = module.exports = class
 		for page in @pageFiles()
 			data = @postInfo page, yes
 			pageDir = "#{@siteDir}#{data.slug}"
-			mkdirp.sync pageDir
-			fs.writeFileSync "#{pageDir}index.html", @render([data]), 'utf8'
+			mkdirp pageDir, (error) ->
+				throw error if error?
+				fs.writeFile "#{pageDir}index.html", @render([data]), 'utf8'
 
 		callback? null
 
@@ -254,7 +257,7 @@ Hey = module.exports = class
 		for tag, posts of @tags
 			tagDir = "#{@siteDir}tags/#{tag}/"
 			mkdirp.sync tagDir unless fs.existsSync tagDir
-			fs.writeFileSync "#{tagDir}index.html", @render(posts), 'utf8'
+			fs.writeFile "#{tagDir}index.html", @render(posts), 'utf8'
 
 		callback?(null)
 
@@ -267,7 +270,7 @@ Hey = module.exports = class
 		for archiveDir, posts of @archive
 			archiveDir = "#{@siteDir}#{archiveDir.replace('-', '/')}/"
 			mkdirp.sync archiveDir unless fs.existsSync archiveDir
-			fs.writeFileSync "#{archiveDir}index.html", @render(posts), 'utf8'
+			fs.writeFile "#{archiveDir}index.html", @render(posts), 'utf8'
 
 		callback?(null)
 
@@ -332,7 +335,7 @@ Hey = module.exports = class
 		config = [
 			'{'
 			'  "siteTitle": "Hey-coffee Blog",'
-			'  "author": "Si",'
+			'  "author": "Dunkin",'
 			'  "description": "My awesome blog, JACK!",'
 			'  "site": "http://yoursite.com",'
 			'  "postsOnHomePage": 20,'
@@ -376,7 +379,7 @@ Hey = module.exports = class
 
 # utility functions
 readJSON = (file) ->
-	throw "JSON file doesn't exist: #{file}" unless fs.existsSync file
+	throw new Error "JSON file doesn't exist: #{file}" unless fs.existsSync file
 	fileContents = fs.readFileSync(file).toString()
 	if fileContents then JSON.parse(fileContents) else []
 
