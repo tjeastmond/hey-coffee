@@ -50,10 +50,23 @@ describe 'Building a blog', ->
 	it 'should update the cache', (done) ->
 		cache = JSON.parse fs.readFileSync(@hey.cacheFile).toString()
 		cache.should.have.length 1
-		done()
+		do done
 
 	it 'should create HTML files', (done) ->
 		fs.existsSync("#{blogDir}site/index.html").should.be.true
 		fs.existsSync("#{blogDir}site/2013/04/22/first-post/index.html").should.be.true
 		fs.existsSync("#{blogDir}site/tags/tests/index.html").should.be.true
+		do done
+
+describe 'Archiving a blog', ->
+	before -> create_new_blog.call this
+	after (done) -> delete_blog_folder done
+
+	it 'should create the versions/ folder', (done) ->
+		@hey.backup =>
+			fs.existsSync(@hey.versionsDir).should.be.true
+			do done
+
+	it 'should create the gzip file', (done) ->
+		fs.readdirSync(@hey.versionsDir).should.have.length 1
 		do done

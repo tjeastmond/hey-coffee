@@ -274,16 +274,25 @@ Hey = module.exports = class
 
 		callback?()
 
-	version: ->
+	backup: (name, callback) ->
+		if typeof name is 'function'
+			callback = name
+			name = null
+
+		name = if typeof name is 'string' then " - #{name}"  else ''
+
 		@build =>
 			fstream = require 'fstream'
 			tar = require 'tar'
 			zlib = require 'zlib'
-			name = "#{@versionsDir}compressed_folder.tar.gz"
+			date = new Date
+			w = fstream.Writer path: "#{@versionsDir}#{date.toFormat 'YYYYMMDD'}#{name}.tar.gz"
 			mkdirp.sync @versionsDir unless fs.existsSync @versionsDir
 			fstream.Reader({ path: @siteDir, type: 'Directory' })
-				   .pipe(tar.Pack()).pipe(zlib.Gzip())
-				   .pipe(fstream.Writer({ path: name }))
+				   .on('end', callback or ->)
+				   .pipe(tar.Pack())
+				   .pipe(zlib.Gzip())
+				   .pipe w
 
 	watch: (callback) =>
 		console.log 'Watching for changes and starting the server'.yellow

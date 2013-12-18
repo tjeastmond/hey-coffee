@@ -1,6 +1,19 @@
+## 0.5.8
+
+Features:
+
+  - Added a backup command that will create a fresh version of your site and gzips it to a **versions** directory
+  - Added tests for new backup functionality
+  - Started development of a heavy load (10k posts) test script
+
+Bugfixes:
+
+  - Fixed sync problem when building out pages
+
 ## 0.5.7
 
 Features:
+
   - Switched some tasks to be async instead of sync
   - Added a test condition to watch for an exception when trying to create a site in a directory that has one already
 
