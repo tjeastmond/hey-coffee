@@ -1,3 +1,9 @@
+## 0.5.9
+
+Bugfixes:
+
+  - Put archive index page generation functionality back. Sorry about that, a test has been written to prevent this from happening again
+
 ## 0.5.8
 
 Features:

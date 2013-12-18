@@ -200,6 +200,7 @@ Hey = module.exports = class
 					do next
 
 				process = [
+					@buildArchive
 					@buildArchiveList
 					@buildTags
 					@buildIndex
@@ -259,6 +260,19 @@ Hey = module.exports = class
 			tagDir = "#{@siteDir}tags/#{tag}/"
 			mkdirp.sync tagDir unless fs.existsSync tagDir
 			fs.writeFile "#{tagDir}index.html", @render(posts), 'utf8'
+
+		callback?(null)
+
+	buildArchive: (callback) =>
+		@archive = {}
+		for post in @cache when 'published' in _.keys post
+			@archive[post.archiveDir] = [] unless _.has @archive, post.archiveDir
+			@archive[post.archiveDir].push post
+
+		for archiveDir, posts of @archive
+			archiveDir = "#{@siteDir}#{archiveDir.replace('-', '/')}/"
+			mkdirp.sync archiveDir unless fs.existsSync archiveDir
+			fs.writeFile "#{archiveDir}index.html", @render(posts), 'utf8'
 
 		callback?(null)
 

@@ -54,6 +54,7 @@ describe 'Building a blog', ->
 
 	it 'should create HTML files', (done) ->
 		fs.existsSync("#{blogDir}site/index.html").should.be.true
+		fs.existsSync("#{blogDir}site/2013/04/index.html").should.be.true
 		fs.existsSync("#{blogDir}site/2013/04/22/first-post/index.html").should.be.true
 		fs.existsSync("#{blogDir}site/tags/tests/index.html").should.be.true
 		do done
