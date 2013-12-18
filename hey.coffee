@@ -29,6 +29,7 @@ Hey = module.exports = class
 		@pagesDir = "#{@cwd}pages/"
 		@siteDir = "#{@cwd}site/"
 		@publicDir = "#{@cwd}public/"
+		@versionsDir = "#{@cwd}versions/"
 		@rssFile = "#{@cwd}site/rss.xml"
 
 	init: ->
@@ -236,16 +237,17 @@ Hey = module.exports = class
 
 		callback? null
 
+	# @todo: add parallel async
 	buildPages: (callback) =>
 		for page in @pageFiles()
 			data = @postInfo page, yes
 			pageDir = "#{@siteDir}#{data.slug}"
-			mkdirp pageDir, (error) ->
-				throw error if error?
-				fs.writeFile "#{pageDir}index.html", @render([data]), 'utf8'
+			mkdirp.sync pageDir
+			fs.writeFileSync "#{pageDir}index.html", @render([data]), 'utf8'
 
 		callback? null
 
+	# @todo: add parallel async
 	buildTags: (callback) =>
 		@tags = {}
 		for post in @cache when post.tags.length > 0
@@ -271,6 +273,17 @@ Hey = module.exports = class
 		_.sortBy @archiveIndex, (result) -> result.link.replace '/', ''
 
 		callback?()
+
+	version: ->
+		@build =>
+			fstream = require 'fstream'
+			tar = require 'tar'
+			zlib = require 'zlib'
+			name = "#{@versionsDir}compressed_folder.tar.gz"
+			mkdirp.sync @versionsDir unless fs.existsSync @versionsDir
+			fstream.Reader({ path: @siteDir, type: 'Directory' })
+				   .pipe(tar.Pack()).pipe(zlib.Gzip())
+				   .pipe(fstream.Writer({ path: name }))
 
 	watch: (callback) =>
 		console.log 'Watching for changes and starting the server'.yellow
