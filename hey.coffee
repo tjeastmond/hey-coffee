@@ -23,13 +23,15 @@ Hey = module.exports = class
 		@cwd = dir or process.cwd() + "/"
 		@template = null
 		@webServer = null
-		@cacheFile = "#{@cwd}hey-cache.json"
-		@configFile = "#{@cwd}hey-config.json"
-		@templateFile = "#{@cwd}template.html"
+		@layouts = {}
+		@layoutsDir = "#{@cwd}layouts/"
 		@pagesDir = "#{@cwd}pages/"
 		@siteDir = "#{@cwd}site/"
 		@publicDir = "#{@cwd}public/"
 		@versionsDir = "#{@cwd}versions/"
+		@cacheFile = "#{@cwd}hey-cache.json"
+		@configFile = "#{@cwd}hey-config.json"
+		@defaultTemplateFile = "template.html"
 		@rssFile = "#{@cwd}site/rss.xml"
 
 	init: ->
@@ -39,14 +41,16 @@ Hey = module.exports = class
 		mkdirp @siteDir
 		mkdirp @pagesDir
 		mkdirp @publicDir
+		mkdirp @layoutsDir
 		mkdirp @postPath()
 
 		defaults = @defaults()
 
 		fs.writeFileSync @cacheFile, '', 'utf8'
-		fs.writeFileSync @templateFile, defaults.tpl, 'utf8'
+		fs.writeFileSync "#{@layoutsDir}#{@defaultTemplateFile}", defaults.tpl, 'utf8'
 		fs.writeFileSync @configFile, defaults.config, 'utf8'
 		fs.writeFileSync @postPath('first-post.md'), defaults.post, 'utf8'
+
 		yes
 
 	server: (silent, callback) =>
@@ -98,25 +102,39 @@ Hey = module.exports = class
 
 	loadConfig: ->
 		@config = readJSON @configFile
+		@defaultTemplateFile = @config.defaultTemplate if @config.defaultTemplate
 		yes
 
 	loadCache: ->
 		@cache = readJSON(@cacheFile) or []
 		yes
 
-	loadTemplate: ->
-		return true if @template?
-		@template = handlebars.compile fs.readFileSync(@templateFile).toString()
+	loadTemplate: (name) ->
+		return false unless name
+		return true if @layouts[name]
+		@layouts[name] = @readAndCompileTemplateFile @templatePath(name)
 		yes
+
+	readAndCompileTemplateFile: (filename) ->
+		handlebars.compile fs.readFileSync(filename).toString()
 
 	postPath: (filename) ->
 		"#{@cwd}posts/#{filename or ''}"
+
+	templatePath: (filename) ->
+		"#{@layoutsDir}#{filename}"
+
+	templateExists: (name) ->
+		fs.existsSync @templatePath name
 
 	postFiles: ->
 		readDir @postPath()
 
 	pageFiles: ->
 		readDir @pagesDir
+
+	layoutFiles: ->
+		readDir @layoutFiles
 
 	setType: (post) ->
 		return post unless post.type
@@ -216,7 +234,7 @@ Hey = module.exports = class
 		posts = @cache.filter((p) -> 'published' in _.keys p)[0..index]
 		fs.writeFile "#{@cwd}site/index.html", @render(posts), 'utf8'
 		@buildRss posts
-		callback?(null)
+		callback? null
 
 	buildRss: (posts, callback) =>
 		feed = new rss
@@ -261,7 +279,7 @@ Hey = module.exports = class
 			mkdirp.sync tagDir unless fs.existsSync tagDir
 			fs.writeFile "#{tagDir}index.html", @render(posts), 'utf8'
 
-		callback?(null)
+		callback? null
 
 	buildArchive: (callback) =>
 		@archive = {}
@@ -317,13 +335,13 @@ Hey = module.exports = class
 		handlePostsAndPages = (ev, filename) =>
 			rebuild 'Recompiling posts and pages' if filename and path.extname(filename) is '.md'
 
-		# watch posts and pages for changes
+		# watch templates, posts and pages for changes
 		fs.watch @postPath(), handlePostsAndPages
 		fs.watch @pagesDir, handlePostsAndPages
-
-		fs.watchFile @templateFile, persistent: true, interval: 1000, (curr, prev) =>
-			@template = null
-			rebuild 'Recompiling template'
+		fs.watch @layoutsDir, (ev, filename) =>
+			if filename and path.extname(filename) is '.html'
+				@layouts = {}
+				rebuild 'Recompiling template'
 
 		rebuild 'Built the site'
 
@@ -333,8 +351,6 @@ Hey = module.exports = class
 
 	render: (posts) ->
 		throw "Posts must be an array" unless _.isArray posts
-		do @loadTemplate
-
 		options = _.omit @config, 'server'
 		options.pageTitle = @pageTitle if posts.length is 1 then posts[0].title else ''
 		options.archiveList = @archiveIndex
@@ -347,7 +363,14 @@ Hey = module.exports = class
 
 		options.isIndex = true if posts.length > 1
 
-		html = @template _.extend options, posts: posts
+		template = if posts.length is 1 and posts[0]['layout'] and @templateExists(posts[0]['layout'])
+			posts[0]['layout']
+		else
+			@defaultTemplateFile
+
+		@loadTemplate template
+
+		html = @layouts[template] _.extend options, posts: posts
 		html.replace /\n|\r|\t/g, ''
 
 	pageTitle: (postTitle) ->
@@ -364,7 +387,8 @@ Hey = module.exports = class
 			'  "server": "user@yoursite.com:/path/to/your/blog",'
 			'  "port": 22,'
 			'  "prettyDateFormat": "DDDD, DD MMMM YYYY",'
-			'  "ymdFormat": "YYYY-MM-DD"'
+			'  "ymdFormat": "YYYY-MM-DD",'
+			'  "defaultTemplate": "template.html"'
 			'}'
 		].join '\n'
 

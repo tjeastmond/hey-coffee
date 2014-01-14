@@ -1,3 +1,10 @@
+## 0.6.0
+
+Features:
+
+  - New layouts/ directory. Default template file will live in this folder for now on
+  - If posts or pages have a 'layout' variable, Hey.coffee will use that file for rendering the HTML instead of the default one
+
 ## 0.5.9
 
 Bugfixes:

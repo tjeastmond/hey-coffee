@@ -31,14 +31,16 @@ describe 'Hey-coffee', ->
 describe 'Creating a blog', ->
 	before -> create_new_blog.call this
 	after (done) -> delete_blog_folder done
+
 	it 'should throw an error if a blog already exists', -> (=> @hey.init()).should.throw()
 	it 'should create a config file', -> fs.existsSync(@hey.configFile).should.be.true
 	it 'should create a posts directory', -> fs.existsSync(@hey.postPath()).should.be.true
 	it 'should create a pages directory', -> fs.existsSync(@hey.pagesDir).should.be.true
 	it 'should create a public directory', -> fs.existsSync(@hey.publicDir).should.be.true
+	it 'should create a layouts directory', -> fs.existsSync(@hey.layoutsDir).should.be.true
 	it 'should create a site directory', -> fs.existsSync(@hey.siteDir).should.be.true
 	it 'should create a cache file', -> fs.existsSync(@hey.cacheFile).should.be.true
-	it 'should create a template file', -> fs.existsSync(@hey.templateFile).should.be.true
+	it 'should create a template file', -> fs.existsSync(@hey.templatePath(@hey.defaultTemplateFile)).should.be.true
 
 describe 'Building a blog', ->
 	before -> create_new_blog.call this
