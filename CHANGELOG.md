@@ -1,3 +1,10 @@
+## 0.7.0
+
+Features:
+
+  - The homepage can now be a static page rather than a blog. In the config file, set 'homepage' to page to make it a static page. Hey-coffee will then look for a index.html in your `pages` directory and make that the home page. You can change the directory your blog post list will be found at by changing the config for `blogDirectory`. It defaults to `blog`
+  - If posts or pages have a 'layout' variable, Hey.coffee will use that file for rendering the HTML instead of the default one
+
 ## 0.6.0
 
 Features:

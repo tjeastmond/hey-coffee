@@ -232,7 +232,17 @@ Hey = module.exports = class
 	buildIndex: (callback) =>
 		index = @config.postsOnHomePage - 1
 		posts = @cache.filter((p) -> 'published' in _.keys p)[0..index]
-		fs.writeFile "#{@cwd}site/index.html", @render(posts), 'utf8'
+		blogIndex = siteIndex = "#{@cwd}site/"
+		staticIndex = "index.md"
+
+		if @config.homepage is 'page' and fs.existsSync "#{@pagesDir}#{staticIndex}"
+			data = @postInfo staticIndex, yes
+			blogIndex = "#{@siteDir}#{@config.blogDirectory}/"
+			mkdirp.sync blogIndex
+			fs.writeFileSync siteIndex, @render([data]), 'utf8'
+
+		fs.writeFile "#{blogIndex}index.html", @render(posts), 'utf8'
+
 		@buildRss posts
 		callback? null
 
@@ -259,6 +269,7 @@ Hey = module.exports = class
 	# @todo: add parallel async
 	buildPages: (callback) =>
 		for page in @pageFiles()
+			continue if page is 'index.md'
 			data = @postInfo page, yes
 			pageDir = "#{@siteDir}#{data.slug}"
 			mkdirp.sync pageDir
@@ -388,7 +399,9 @@ Hey = module.exports = class
 			'  "port": 22,'
 			'  "prettyDateFormat": "DDDD, DD MMMM YYYY",'
 			'  "ymdFormat": "YYYY-MM-DD",'
-			'  "defaultTemplate": "template.html"'
+			'  "defaultTemplate": "template.html",'
+			'  "homepage": "blog",'
+			'  "blogDirectory": "blog"'
 			'}'
 		].join '\n'
 
