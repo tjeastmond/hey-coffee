@@ -1,8 +1,8 @@
 # Hey-coffee
 
-**VERSION 1.0 ON THE WAY**
+2018-01-05: Updated some old dependencies and started new version of flatfile blog engine.
 
-**These docs are a work in progress. As this software is still in its early stages, there will occasionally be a few things re-thought and refactored. Thanks for dealing with my bad behavior.**
+**A non-coffeescript version of this tool is under development. I apologize to those that have been using Hey-coffee.**
 
 Hey-coffee is a simple flatfile blog tool. Write your posts with markdown, and publish via the commandline. You place your post files in the posts directory, and anything static like CSS or JavaScript into the public/ directory. When the build command is called, these things happen:
 

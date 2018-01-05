@@ -1,10 +1,9 @@
 {
   "name": "hey-coffee",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Simple flatfile site/blog tool",
   "homepage": "https://github.com/tjeastmond/hey-coffee",
   "main": "index.coffee",
-  "scripts": { "test": "make test" },
   "repository": "git://github.com/tjeastmond/hey-coffee.git",
   "keywords": [
     "blog",
@@ -20,22 +19,22 @@
     "static"
   ],
   "dependencies": {
-  	"coffee-script": "~1.6.3",
-  	"async": "~0.2.9",
-  	"underscore": "~1.5.2",
-  	"marked": "~0.2.10",
-  	"commander": "~2.1.0",
-  	"date-utils": "~1.2.14",
-  	"handlebars": "~1.1.2",
+    "async": "^2.6.0",
+    "coffeescript": "^2.1.1",
+    "colors": "~0.6.2",
+    "commander": "~2.1.0",
+    "date-utils": "~1.2.14",
+    "fstream": "^1.0.11",
+    "handlebars": "~4.0.0",
+    "marked": "~0.3.9",
     "mkdirp": "~0.3.5",
     "rss": "~0.2.1",
-    "colors": "~0.6.2",
-    "tar": "~0.1.19",
-    "fstream": "~0.1.25"
+    "tar": "~2.0.0",
+    "underscore": "~1.5.2"
   },
   "devDependencies": {
-  	"mocha": "~1.15.1",
-  	"should": "~2.1.1"
+    "mocha": "^4.1.0",
+    "should": "^13.2.0"
   },
   "bin": {
     "hey": "./bin/hey"
@@ -44,6 +43,11 @@
     "name": "TJ Eastmond",
     "email": "tj.eastmond@gmail.com",
     "url": "http://tjeastmond.com"
+  },
+  "scripts": {
+    "test": "mocha ./test/tests.coffee",
+    "cat": "mocha ./test/tests.coffee --reporter nyan",
+    "clear:test": "rm -rf ./test/blog"
   },
   "license": "MIT"
 }

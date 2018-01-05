@@ -1,3 +1,10 @@
+## 0.8.0
+
+Features:
+
+  - Updated package dependencies
+  - Removed silly Makefile and put scripts in package.json
+
 ## 0.7.0
 
 Features:
