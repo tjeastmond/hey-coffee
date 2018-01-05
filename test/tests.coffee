@@ -13,11 +13,10 @@ blogDir = process.cwd() + '/test/blog/'
 # misc functions
 create_blog_folder = ->	mkdirp.sync blogDir
 delete_blog_folder = (callback) -> exec "rm -rf #{blogDir}", callback
-create_new_blog = (callback) ->
+create_new_blog = ->
 	do create_blog_folder
 	@hey = new Hey blogDir
 	do @hey.init
-	callback?()
 
 describe 'Hey-coffee', ->
 	before -> @hey = new Hey
@@ -65,7 +64,7 @@ describe 'Archiving a blog', ->
 	before -> create_new_blog.call this
 	after (done) -> delete_blog_folder done
 
-	it 'should create the versions/ folder', (done) ->
+	it 'should create the versions directory', (done) ->
 		@hey.backup =>
 			fs.existsSync(@hey.versionsDir).should.be.true
 			do done

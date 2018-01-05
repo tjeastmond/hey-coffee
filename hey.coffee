@@ -332,10 +332,10 @@ Hey = module.exports = class
 			w = fstream.Writer path: "#{@versionsDir}#{date.toFormat 'YYYYMMDD'}#{name}.tar.gz"
 			mkdirp.sync @versionsDir unless fs.existsSync @versionsDir
 			fstream.Reader({ path: @siteDir, type: 'Directory' })
-				   .on('end', callback or ->)
-				   .pipe(tar.Pack())
-				   .pipe(zlib.Gzip())
-				   .pipe w
+				.on('end', callback or ->)
+				.pipe(tar.Pack())
+				.pipe(zlib.Gzip())
+				.pipe w
 
 	watch: (callback) =>
 		console.log 'Watching for changes and starting the server'.yellow
